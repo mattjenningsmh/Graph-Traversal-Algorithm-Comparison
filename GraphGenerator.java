@@ -6,7 +6,7 @@ import java.util.*;
  */
 public class GraphGenerator<K> {
     // max edge weight
-    private static final int MAX_EDGE_WEIGHT = 100;
+    private int max_edge_weight = 100;
 
     // Underlying data structures
     private Map<K, Map<K, Integer>> map;
@@ -14,6 +14,9 @@ public class GraphGenerator<K> {
     // Random
     private int seed = 3;
     private Random rand;
+    
+    //2D array representing grid node positions  
+    private List<List<K>> g;
 
     public GraphGenerator(Collection<K> nodes) {
         this.map = new HashMap<>();
@@ -29,38 +32,39 @@ public class GraphGenerator<K> {
             map.get(node).clear();
         }
     }
-
+    public void setMaxEdgeWeight(int n){
+        this.max_edge_weight = n; 
+    }
     // returns the underlying map. remove this in the future and implement map
     // methods manually.
     public Map<K, Map<K, Integer>> getGraph() {
         return map;
     }
-private List<List<K>> g;
+    
     /*
      * generate grid graph with random weight
      * 
      * @param size - this is a size x size graph
      */
-    public void createGridGraph(int size) {
+    public void createGridGraph(int size, int maxWeight) {
         // Generate 2d array
         g = toArray(size); 
         // Generate undirected weighted edges in grid        
-        gridEdges(g); 
+        gridEdges(g,maxWeight); 
     }
 
-    // Yuck 
-    private void gridEdges(List<List<K>> g){
+    private void gridEdges(List<List<K>> g, int maxWeight){
         int maxSize = g.size(); 
         for (int i = 0; i < g.size(); i++) {
             for (int j = 0; j < g.get(i).size(); j++) {
                 K curr = g.get(i).get(j);
                 if(j+1 < maxSize){
                     K right = g.get(i).get(j+1);
-                    addUndirectedEdge(curr, right);
+                    addUndirectedEdge(curr, right, maxWeight);
                 }
                 if(i+1 < maxSize){
                     K down = g.get(i+1).get(j); 
-                    addUndirectedEdge(curr, down);
+                    addUndirectedEdge(curr, down, maxWeight);
                 }
             }
         }
@@ -140,27 +144,30 @@ private List<List<K>> g;
     }
 
     // add an undirected edge of a random weight
-    private void addUndirectedEdge(K curr, K next) {
-        int edgeWeight = 1; //randInt(MAX_EDGE_WEIGHT);
+    private void addUndirectedEdge(K curr, K next, int maxWeight) {
+        int edgeWeight = randInt(max_edge_weight)+1;
+        if (maxWeight == 1){
+            edgeWeight = 1;
+        }
         if (!map.get(curr).containsKey(next)) {
             map.get(curr).put(next, edgeWeight);
             map.get(next).put(curr, edgeWeight);
         }
     }
 
+    private int randInt(int range) {
+        return rand.nextInt(range);
+    }
+
     private void ensureConnectivity() {
         // System.out.println("ensureConnectivity called");
         int rNum;
         for (int i = 0; i < nodes.size(); i++) {
-            rNum = rand.nextInt(MAX_EDGE_WEIGHT);
+            rNum = rand.nextInt(max_edge_weight);
             K curr = nodes.get(i);
             K next = nodes.get((i + 1) % nodes.size());
             addEdge(curr, next, rNum);
         }
-    }
-
-    private int randInt(int range) {
-        return rand.nextInt(range);
     }
 
     // Helper Method for generating Random graph

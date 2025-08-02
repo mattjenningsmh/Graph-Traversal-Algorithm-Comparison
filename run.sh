@@ -1,5 +1,5 @@
 #!/bin/bash
 
-javac -d out GraphGenerator.java Tester.java
+javac -d out GraphGenerator.java AStar.java Dijkstras.java Tester.java 
 
-java -cp out Tester > balls.txt
+java -Xmx8g -cp out Tester 
